@@ -3,6 +3,7 @@ import { Button, Image, View } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import Constants from "expo-constants";
 import * as Permissions from "expo-permissions";
+import * as FileSystem from "expo-file-system";
 
 export default class ImagePickerExample extends React.Component {
   state = {
@@ -49,15 +50,21 @@ export default class ImagePickerExample extends React.Component {
 
     if (!result.cancelled) {
       this.setState({ image: result.uri }, () => {
-        this.runDeepTag();
+        this.imgToBase64();
       });
     }
   };
 
-  runDeepTag = () => {
+  imgToBase64 = async () => {
+    let img = await FileSystem.readAsStringAsync(this.state.image, {
+      encoding: FileSystem.EncodingType.Base64
+    });
+    this.runDeepTag(img);
+  };
+
+  runDeepTag = img => {
     console.log("deeptag now running");
-    console.log(this.state.image);
-    console.log(JSON.stringify(this.state.image));
+
     return fetch(
       "https://europe-west1-piwi-project.cloudfunctions.net/ML-Hashtagger",
       {
@@ -67,7 +74,7 @@ export default class ImagePickerExample extends React.Component {
           "Content-Type": "application/json; charset=utf-8"
         },
         body: JSON.stringify({
-          image: this.state.image
+          image: img
         })
       }
     )
