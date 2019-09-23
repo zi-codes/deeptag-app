@@ -6,7 +6,8 @@ import * as Permissions from "expo-permissions";
 
 export default class ImagePickerExample extends React.Component {
   state = {
-    image: null
+    image: null,
+    tags: null
   };
 
   render() {
@@ -30,10 +31,6 @@ export default class ImagePickerExample extends React.Component {
     this.getPermissionAsync();
   }
 
-  componentDidUpdate() {
-    console.log("the component updated!");
-  }
-
   getPermissionAsync = async () => {
     if (Constants.platform.ios) {
       const { status } = await Permissions.askAsync(Permissions.CAMERA_ROLL);
@@ -51,9 +48,35 @@ export default class ImagePickerExample extends React.Component {
     });
 
     console.log(result);
+    this.runDeepTag();
 
     if (!result.cancelled) {
       this.setState({ image: result.uri });
     }
+  };
+
+  runDeepTag = () => {
+    console.log("deeptag now running");
+    return fetch(
+      "https://europe-west1-piwi-project.cloudfunctions.net/ML-Hashtagger",
+      {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        body: JSON.stringify({
+          image: this.state.image
+        })
+      }
+    )
+      .then(response => {
+        console.log("response received======");
+        console.log(response);
+      })
+      .catch(error => {
+        console.log("error===========");
+        console.error(error);
+      });
   };
 }
