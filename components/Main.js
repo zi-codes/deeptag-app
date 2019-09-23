@@ -47,16 +47,17 @@ export default class ImagePickerExample extends React.Component {
       aspect: [4, 3]
     });
 
-    console.log(result);
-    this.runDeepTag();
-
     if (!result.cancelled) {
-      this.setState({ image: result.uri });
+      this.setState({ image: result.uri }, () => {
+        this.runDeepTag();
+      });
     }
   };
 
   runDeepTag = () => {
     console.log("deeptag now running");
+    console.log(this.state.image);
+    console.log(JSON.stringify(this.state.image));
     return fetch(
       "https://europe-west1-piwi-project.cloudfunctions.net/ML-Hashtagger",
       {
